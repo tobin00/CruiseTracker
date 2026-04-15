@@ -75,6 +75,15 @@ function fmtDateShort(ms) {
     { month:'short', day:'numeric', year:'numeric', timeZone:'UTC' });
 }
 
+/** Compass bearing (degrees, 0=N, clockwise) from point A to point B */
+function calcBearing(lat1, lon1, lat2, lon2) {
+  const r = Math.PI / 180;
+  const φ1 = lat1 * r, φ2 = lat2 * r, Δλ = (lon2 - lon1) * r;
+  const y = Math.sin(Δλ) * Math.cos(φ2);
+  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
 /** Binary search: index of last record with t <= targetMs */
 function bisectRight(records, targetMs) {
   let lo = 0, hi = records.length - 1, pos = 0;
@@ -106,7 +115,10 @@ function shipPositionAt(name, targetMs) {
   const r0  = recs[idx];
   const r1  = recs[Math.min(idx+1, recs.length-1)];
   const { lat, lon } = interpolate(r0, r1, targetMs);
-  return { lat, lon, status: r0.s, port: r0.p, nextPort: r1.p, record: r0 };
+  // Bearing: direction of travel toward next waypoint (or previous if at end)
+  const bSrc = (r1 !== r0) ? r1 : recs[Math.max(0, idx-1)];
+  const bearing = calcBearing(lat, lon, bSrc.lat, bSrc.lon);
+  return { lat, lon, status: r0.s, port: r0.p, nextPort: r1.p, record: r0, bearing };
 }
 
 /** Get trail points for last N hours */
@@ -192,14 +204,17 @@ function buildShipGeoJSON(targetMs) {
   for (const name of followShips) {
     const pos = shipPositionAt(name, targetMs);
     if (!pos) continue;
+    const inPort = pos.status === 'port';
     features.push({
       type: 'Feature',
       geometry: { type: 'Point', coordinates: [pos.lon, pos.lat] },
       properties: {
         name,
-        color:  SHIP_COLORS[name] || DEFAULT_COLOR,
-        status: pos.status,
-        port:   pos.port || pos.nextPort || '',
+        color:   SHIP_COLORS[name] || DEFAULT_COLOR,
+        status:  pos.status,
+        port:    pos.port || pos.nextPort || '',
+        bearing: inPort ? 0 : pos.bearing,
+        icon:    (name.toLowerCase()) + (inPort ? '-anchor' : '-ship'),
       },
     });
   }
@@ -247,13 +262,115 @@ function splitAntimeridian(pts) {
   return segs;
 }
 
-function addShipLayers() {
-  // Ship icon: create a simple coloured circle SVG registered as a map image
-  // We use a circle marker drawn via a symbol layer with dynamic colour from data
-  // (MapLibre supports data-driven paint on circle layers)
+// ── Ship icon generation ─────────────────────────────────────────
+// Top-down cruise ship silhouette, bow pointing up (north).
+// Drawn on a 32×64 canvas; displayed via MapLibre symbol layer.
+function createShipImage(color) {
+  const W = 32, H = 64, cx = W / 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
 
-  // Trail layer
+  // Hull glow
+  ctx.save();
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 10;
+
+  // Hull path — pointed bow at top, rounded stern at bottom
+  ctx.beginPath();
+  ctx.moveTo(cx, 2);                                      // bow tip
+  ctx.quadraticCurveTo(cx + 11, H * 0.18, cx + 12, H * 0.46);
+  ctx.quadraticCurveTo(cx + 11, H * 0.72, cx +  8, H - 5);
+  ctx.quadraticCurveTo(cx,      H -  2,   cx -  8, H - 5);
+  ctx.quadraticCurveTo(cx - 11, H * 0.72, cx - 12, H * 0.46);
+  ctx.quadraticCurveTo(cx - 11, H * 0.18, cx,      2);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.restore();
+
+  // Hull outline
+  ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Superstructure block
+  ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  ctx.fillRect(cx - 7, H * 0.22, 14, H * 0.40);
+
+  // Funnel
+  ctx.fillStyle = 'rgba(0,0,0,0.38)';
+  ctx.fillRect(cx - 4, H * 0.30, 8, H * 0.09);
+
+  // Waterline stripe
+  ctx.fillStyle = 'rgba(0,0,0,0.22)';
+  ctx.fillRect(cx - 12, H * 0.68, 24, 3);
+
+  return ctx.getImageData(0, 0, W, H);
+}
+
+// Simple anchor icon for ships in port
+function createAnchorImage(color) {
+  const S = 32, cx = S / 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = S; canvas.height = S;
+  const ctx = canvas.getContext('2d');
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+
+  // Ring
+  ctx.beginPath();
+  ctx.arc(cx, 8, 4, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Shaft
+  ctx.beginPath();
+  ctx.moveTo(cx, 12); ctx.lineTo(cx, 26);
+  ctx.stroke();
+
+  // Crossbar
+  ctx.beginPath();
+  ctx.moveTo(cx - 8, 16); ctx.lineTo(cx + 8, 16);
+  ctx.stroke();
+
+  // Flukes
+  ctx.beginPath();
+  ctx.moveTo(cx, 26); ctx.lineTo(cx - 8, 21);
+  ctx.moveTo(cx, 26); ctx.lineTo(cx + 8, 21);
+  ctx.stroke();
+
+  return ctx.getImageData(0, 0, S, S);
+}
+
+function loadShipImages() {
+  for (const [name, color] of Object.entries(SHIP_COLORS)) {
+    const slug = name.toLowerCase();
+    const ship   = createShipImage(color);
+    const anchor = createAnchorImage(color);
+    map.addImage(slug + '-ship',   { width: ship.width,   height: ship.height,   data: ship.data   });
+    map.addImage(slug + '-anchor', { width: anchor.width, height: anchor.height, data: anchor.data });
+  }
+}
+
+function addShipLayers() {
+  loadShipImages();
+
+  // Trail source + layers
   map.addSource('trails', { type: 'geojson', data: { type:'FeatureCollection', features:[] } });
+  map.addLayer({
+    id: 'trails-glow',
+    type: 'line',
+    source: 'trails',
+    paint: {
+      'line-color':   ['get', 'color'],
+      'line-width':   8,
+      'line-opacity': 0.12,
+      'line-blur':    4,
+    },
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+  });
   map.addLayer({
     id: 'trails',
     type: 'line',
@@ -267,43 +384,34 @@ function addShipLayers() {
     layout: { 'line-join': 'round', 'line-cap': 'round' },
   });
 
-  // Glow layer (wider, more transparent)
-  map.addLayer({
-    id: 'trails-glow',
-    type: 'line',
-    source: 'trails',
-    paint: {
-      'line-color':   ['get', 'color'],
-      'line-width':   8,
-      'line-opacity': 0.12,
-      'line-blur':    4,
-    },
-    layout: { 'line-join': 'round', 'line-cap': 'round' },
-  }, 'trails');
-
-  // Ship dots
+  // Ship source
   map.addSource('ships', { type: 'geojson', data: { type:'FeatureCollection', features:[] } });
+
+  // Soft glow ring under icon
   map.addLayer({
     id: 'ships-halo',
     type: 'circle',
     source: 'ships',
     paint: {
-      'circle-radius':       14,
-      'circle-color':        ['get', 'color'],
-      'circle-opacity':      0.15,
-      'circle-blur':         0.6,
-      'circle-stroke-width': 0,
+      'circle-radius':  18,
+      'circle-color':   ['get', 'color'],
+      'circle-opacity': 0.12,
+      'circle-blur':    0.8,
     },
   });
+
+  // Ship icon (symbol, rotates with heading)
   map.addLayer({
     id: 'ships',
-    type: 'circle',
+    type: 'symbol',
     source: 'ships',
-    paint: {
-      'circle-radius':       6,
-      'circle-color':        ['get', 'color'],
-      'circle-stroke-color': '#ffffff',
-      'circle-stroke-width': 1.5,
+    layout: {
+      'icon-image':               ['get', 'icon'],
+      'icon-size':                0.75,
+      'icon-rotate':              ['get', 'bearing'],
+      'icon-rotation-alignment':  'map',
+      'icon-allow-overlap':       true,
+      'icon-ignore-placement':    true,
     },
   });
 
@@ -313,18 +421,18 @@ function addShipLayers() {
     type: 'symbol',
     source: 'ships',
     layout: {
-      'text-field':          ['get', 'name'],
-      'text-font':           ['Open Sans Bold', 'Arial Unicode MS Bold'],
-      'text-size':           12,
-      'text-offset':         [0, 1.4],
-      'text-anchor':         'top',
-      'text-allow-overlap':  false,
-      'text-ignore-placement': false,
+      'text-field':             ['get', 'name'],
+      'text-font':              ['Open Sans Bold', 'Arial Unicode MS Bold'],
+      'text-size':              12,
+      'text-offset':            [0, 2.2],
+      'text-anchor':            'top',
+      'text-allow-overlap':     false,
+      'text-ignore-placement':  false,
     },
     paint: {
-      'text-color':       ['get', 'color'],
-      'text-halo-color':  'rgba(5,17,40,0.9)',
-      'text-halo-width':  2,
+      'text-color':      ['get', 'color'],
+      'text-halo-color': 'rgba(5,17,40,0.9)',
+      'text-halo-width': 2,
     },
   });
 
