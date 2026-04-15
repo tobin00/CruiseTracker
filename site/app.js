@@ -387,19 +387,6 @@ function addShipLayers() {
   // Ship source
   map.addSource('ships', { type: 'geojson', data: { type:'FeatureCollection', features:[] } });
 
-  // Soft glow ring under icon
-  map.addLayer({
-    id: 'ships-halo',
-    type: 'circle',
-    source: 'ships',
-    paint: {
-      'circle-radius':  18,
-      'circle-color':   ['get', 'color'],
-      'circle-opacity': 0.12,
-      'circle-blur':    0.8,
-    },
-  });
-
   // Ship icon (symbol, rotates with heading)
   map.addLayer({
     id: 'ships',
@@ -407,7 +394,7 @@ function addShipLayers() {
     source: 'ships',
     layout: {
       'icon-image':               ['get', 'icon'],
-      'icon-size':                0.75,
+      'icon-size':                0.38,
       'icon-rotate':              ['get', 'bearing'],
       'icon-rotation-alignment':  'map',
       'icon-allow-overlap':       true,
