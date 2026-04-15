@@ -437,6 +437,8 @@ function startFollow() {
   $('tl-controls').classList.add('hidden');
   $('ship-card').classList.remove('hidden');
   followIdx = 0;
+  rtLastMapUpdate = 0;
+  rtRafId = requestAnimationFrame(rtTick);  // keep clock + map live
   flyToCurrentShip();
 }
 
