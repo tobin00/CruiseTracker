@@ -32,7 +32,7 @@ const TL_SPEEDS = [
   { label: '1 wk/s',  ms: 7*24*60*60*1000 },
   { label: '1 mo/s',  ms: 30*24*60*60*1000 },
 ];
-const TL_DEFAULT_SPEED_IDX = 3; // 1 wk/s
+const TL_DEFAULT_SPEED_IDX = 2; // 1 dy/s
 
 // ── State ───────────────────────────────────────────────────────
 let map;
