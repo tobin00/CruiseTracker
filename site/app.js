@@ -505,6 +505,53 @@ function switchMode(mode) {
   if (mode === 'follow')    startFollow();
 }
 
+// ── Fullscreen ───────────────────────────────────────────────────
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+}
+
+// ── Auto-hide UI ─────────────────────────────────────────────────
+const UI_HIDE_DELAY_MS = 4000;
+const UI_ELEMENTS = ['hud', 'btn-fullscreen'];  // always hide these
+let uiHideTimer = null;
+let uiHidden = false;
+
+function showUI() {
+  if (uiHidden) {
+    ['hud', 'btn-fullscreen', 'tl-controls', 'ship-card'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('ui-hidden');
+    });
+    uiHidden = false;
+  }
+  clearTimeout(uiHideTimer);
+  uiHideTimer = setTimeout(hideUI, UI_HIDE_DELAY_MS);
+}
+
+function hideUI() {
+  // Always hide HUD and fullscreen button
+  ['hud', 'btn-fullscreen'].forEach(id => {
+    document.getElementById(id).classList.add('ui-hidden');
+  });
+  // Only hide tl-controls if timelapse is playing (not paused — user may be interacting)
+  if (currentMode === 'timelapse' && tlPlaying) {
+    document.getElementById('tl-controls').classList.add('ui-hidden');
+  }
+  // Hide ship card in follow mode
+  if (currentMode === 'follow') {
+    document.getElementById('ship-card').classList.add('ui-hidden');
+  }
+  uiHidden = true;
+}
+
+function resetUiTimer() {
+  showUI();
+}
+
 // ── Controls wiring ─────────────────────────────────────────────
 function wireControls() {
   // Mode buttons
@@ -582,8 +629,23 @@ function wireControls() {
         map.zoomOut({ duration: 300 }); break;
       case 'Escape':
         map.flyTo({ center: [-40, 25], zoom: 2.2, duration: 1000 }); break;
+      case '`':
+        toggleFullscreen(); break;
     }
   });
+
+  // Fullscreen button
+  $('btn-fullscreen').addEventListener('click', toggleFullscreen);
+  document.addEventListener('fullscreenchange', () => {
+    $('btn-fullscreen').textContent = document.fullscreenElement ? '\u29C9' : '\u26F6';
+  });
+
+  // Auto-hide: reset timer on any user input
+  document.addEventListener('keydown',   resetUiTimer);
+  document.addEventListener('mousemove', resetUiTimer);
+  document.addEventListener('click',     resetUiTimer);
+  document.addEventListener('touchstart',resetUiTimer);
+  showUI(); // start the timer
 
   // Fade out key hint after 6s
   setTimeout(() => $('key-hint').classList.add('hidden'), 6000);
