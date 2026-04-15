@@ -678,7 +678,7 @@ function mapAttrib() {
 
 function showUI() {
   if (uiHidden) {
-    ['hud', 'btn-fullscreen', 'tl-controls', 'ship-card'].forEach(id => {
+    ['hud-title', 'hud-mode-bar', 'btn-fullscreen', 'tl-controls', 'ship-card'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.classList.remove('ui-hidden');
     });
@@ -691,8 +691,8 @@ function showUI() {
 }
 
 function hideUI() {
-  // Always hide HUD, fullscreen button, and map controls
-  ['hud', 'btn-fullscreen'].forEach(id => {
+  // Hide title, mode buttons, fullscreen button — but NOT the clock
+  ['hud-title', 'hud-mode-bar', 'btn-fullscreen'].forEach(id => {
     document.getElementById(id).classList.add('ui-hidden');
   });
   const attrib = mapAttrib();

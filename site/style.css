@@ -283,7 +283,7 @@ html, body, #map {
 #btn-fullscreen:hover { border-color: rgba(6,214,160,0.8); color: #ffd166; }
 
 /* ── Auto-hide: UI elements fade when idle ───────────────────── */
-#hud, #tl-controls, #ship-card, #btn-fullscreen {
+#hud-title, #hud-mode-bar, #tl-controls, #ship-card, #btn-fullscreen {
   transition: opacity 0.6s;
 }
 .ui-hidden {
