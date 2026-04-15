@@ -262,7 +262,7 @@ html, body, #map {
   box-shadow: 0 4px 24px rgba(0,0,0,0.5) !important;
 }
 .maplibregl-popup-tip { display: none !important; }
-.maplibregl-ctrl-attrib { opacity: 0.4 !important; }
+.maplibregl-ctrl-bottom-right { transition: opacity 0.6s; }
 
 /* ── Fullscreen button (top-right) ───────────────────────────── */
 #btn-fullscreen {

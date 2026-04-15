@@ -176,7 +176,7 @@ function initMap() {
     container: 'map',
     style: MAP_STYLE,
     center: [-40, 25],
-    zoom: 2.2,
+    zoom: 1.5,
     minZoom: 1.5,
     maxZoom: 14,
     attributionControl: true,
@@ -498,7 +498,7 @@ function switchMode(mode) {
   });
   // Reset to world view on mode switch (except follow, which flies itself)
   if (mode !== 'follow') {
-    map.flyTo({ center: [-40, 25], zoom: 2.2, duration: 1500, essential: true });
+    map.flyTo({ center: [-40, 25], zoom: 1.5, duration: 1500, essential: true });
   }
   if (mode === 'realtime')  startRealtime();
   if (mode === 'timelapse') startTimelapse();
@@ -514,11 +514,21 @@ function toggleFullscreen() {
   }
 }
 
+function updateFullscreenIcon() {
+  const inFs = !!document.fullscreenElement;
+  document.getElementById('fs-icon-enter').style.display = inFs ? 'none' : '';
+  document.getElementById('fs-icon-exit').style.display  = inFs ? '' : 'none';
+}
+
 // ── Auto-hide UI ─────────────────────────────────────────────────
 const UI_HIDE_DELAY_MS = 4000;
 const UI_ELEMENTS = ['hud', 'btn-fullscreen'];  // always hide these
 let uiHideTimer = null;
 let uiHidden = false;
+
+function mapAttrib() {
+  return document.querySelector('.maplibregl-ctrl-bottom-right');
+}
 
 function showUI() {
   if (uiHidden) {
@@ -526,6 +536,8 @@ function showUI() {
       const el = document.getElementById(id);
       if (el) el.classList.remove('ui-hidden');
     });
+    const attrib = mapAttrib();
+    if (attrib) attrib.classList.remove('ui-hidden');
     uiHidden = false;
   }
   clearTimeout(uiHideTimer);
@@ -533,10 +545,12 @@ function showUI() {
 }
 
 function hideUI() {
-  // Always hide HUD and fullscreen button
+  // Always hide HUD, fullscreen button, and map controls
   ['hud', 'btn-fullscreen'].forEach(id => {
     document.getElementById(id).classList.add('ui-hidden');
   });
+  const attrib = mapAttrib();
+  if (attrib) attrib.classList.add('ui-hidden');
   // Only hide tl-controls if timelapse is playing (not paused — user may be interacting)
   if (currentMode === 'timelapse' && tlPlaying) {
     document.getElementById('tl-controls').classList.add('ui-hidden');
@@ -628,7 +642,7 @@ function wireControls() {
       case '-':
         map.zoomOut({ duration: 300 }); break;
       case 'Escape':
-        map.flyTo({ center: [-40, 25], zoom: 2.2, duration: 1000 }); break;
+        map.flyTo({ center: [-40, 25], zoom: 1.5, duration: 1000 }); break;
       case '`':
         toggleFullscreen(); break;
     }
@@ -636,9 +650,7 @@ function wireControls() {
 
   // Fullscreen button
   $('btn-fullscreen').addEventListener('click', toggleFullscreen);
-  document.addEventListener('fullscreenchange', () => {
-    $('btn-fullscreen').textContent = document.fullscreenElement ? '\u29C9' : '\u26F6';
-  });
+  document.addEventListener('fullscreenchange', updateFullscreenIcon);
 
   // Auto-hide: reset timer on any user input
   document.addEventListener('keydown',   resetUiTimer);

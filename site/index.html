@@ -23,7 +23,14 @@
   </div>
 
   <!-- Fullscreen button (top-right) -->
-  <button id="btn-fullscreen" title="Fullscreen (`)">&#x26F6;</button>
+  <button id="btn-fullscreen" title="Fullscreen (`)">
+    <svg id="fs-icon-enter" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M1 1h5v1.5H2.5V6H1V1zm9 0h5v5h-1.5V2.5H10V1zM1 10h1.5v3.5H6V15H1v-5zm12.5 3.5H10V15h5v-5h-1.5v3.5z"/>
+    </svg>
+    <svg id="fs-icon-exit" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="display:none">
+      <path d="M5.5 1H7v5H1V4.5h3.5V1zm3 0H10v3.5H13.5V6H8V1zm-8 9h6v5H5v-3.5H1.5V10zm9 0h1.5v3.5H15V15H9v-5h.5z"/>
+    </svg>
+  </button>
 
   <!-- Time-lapse controls (shown only in timelapse mode) -->
   <div id="tl-controls" class="hidden">
