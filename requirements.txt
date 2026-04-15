@@ -1,0 +1,14 @@
+# Disney Cruise Tracker — Python dependencies
+# Install with: pip install -r requirements.txt
+
+# Routing (Step 3: route — required for computing new water-safe paths)
+shapely>=2.0
+pyproj>=3.4
+rtree>=1.0
+networkx>=3.0
+geopandas>=0.13
+numpy>=1.24
+
+# Geocoding (Step 2: geocode — optional, only for resolving new port names)
+requests>=2.28
+timezonefinder>=6.2

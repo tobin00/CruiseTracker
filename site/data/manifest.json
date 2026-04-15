@@ -1,0 +1,42 @@
+{
+  "built_at": "2026-04-15T20:52:05.685533+00:00",
+  "ships": [
+    "Adventure",
+    "Destiny",
+    "Dream",
+    "Fantasy",
+    "Magic",
+    "Wish",
+    "Wonder"
+  ],
+  "date_range": {
+    "from": "2026-04-15",
+    "to": "2026-10-04"
+  },
+  "skipped_cruises": [
+    "5-Night Very Merrytime Western Caribbean Cruise from Galveston",
+    "5-Night Western Caribbean Cruise from Galveston",
+    "5-Night Western Caribbean Cruise from Galveston with Marvel Day at Sea",
+    "6-Night Bahamian Cruise from San Juan ending in Galveston",
+    "7-Night Eastern Caribbean Cruise from Fort Lauderdale",
+    "7-Night Eastern Caribbean Cruise from Port Canaveral",
+    "7-Night Halloween on the High Seas Eastern Caribbean Cruise from Port Canaveral",
+    "7-Night Halloween on the High Seas Southern Caribbean Cruise from San Juan",
+    "7-Night Halloween on the High Seas Western Caribbean Cruise from Port Canaveral",
+    "7-Night Mediterranean Cruise from Barcelona",
+    "7-Night Mediterranean with Greek Isles Cruise from Civitavecchia (Rome)",
+    "7-Night Mexican Riviera Cruise from San Diego",
+    "7-Night Norwegian Fjords Cruise from Southampton",
+    "7-Night Southern Caribbean Cruise from San Juan",
+    "7-Night Very Merrytime Eastern Caribbean Cruise from Port Canaveral",
+    "7-Night Very Merrytime Western Caribbean Cruise from Port Canaveral",
+    "7-Night Western Caribbean Cruise from Fort Lauderdale",
+    "7-Night Western Caribbean Cruise from Galveston",
+    "7-Night Western Caribbean Cruise from Port Canaveral",
+    "7-Night Western Europe Cruise from Barcelona ending in Southampton",
+    "7-Night Western Europe Cruise from Southampton",
+    "9-Night Mediterranean with Greek Isles Cruise from Barcelona ending in Civitavecchia (Rome)",
+    "9-Night Mediterranean with Greek Isles Cruise from Civitavecchia (Rome)",
+    "foobar"
+  ]
+}

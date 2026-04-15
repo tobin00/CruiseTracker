@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Disney Cruise Fleet — Live Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- HUD overlay -->
+  <div id="hud">
+    <div id="hud-title">✦ Disney Cruise Fleet</div>
+    <div id="hud-clock"></div>
+    <div id="hud-mode-bar">
+      <button class="mode-btn active" data-mode="realtime"  title="1">Real Time</button>
+      <button class="mode-btn"        data-mode="timelapse" title="2">Time Lapse</button>
+      <button class="mode-btn"        data-mode="follow"    title="3">Follow Ship</button>
+    </div>
+  </div>
+
+  <!-- Time-lapse controls (shown only in timelapse mode) -->
+  <div id="tl-controls" class="hidden">
+    <button id="tl-play" title="Space">▶</button>
+    <input  id="tl-slider" type="range" min="0" max="1000" value="0" />
+    <div id="tl-date"></div>
+    <div id="tl-speed-wrap">
+      <button id="tl-slower" title="↓">−</button>
+      <span   id="tl-speed-label">1 wk/s</span>
+      <button id="tl-faster" title="↑">+</button>
+    </div>
+  </div>
+
+  <!-- Ship info card (shown in follow mode) -->
+  <div id="ship-card" class="hidden">
+    <div id="card-name"></div>
+    <div id="card-status"></div>
+    <div id="card-dest"></div>
+  </div>
+
+  <!-- Loading screen -->
+  <div id="loading">
+    <div id="loading-inner">
+      <div id="loading-title">✦ Disney Cruise Fleet</div>
+      <div id="loading-sub">Loading ship positions…</div>
+      <div id="loading-bar-wrap"><div id="loading-bar"></div></div>
+    </div>
+  </div>
+
+  <!-- Key hint (fade out after a few seconds) -->
+  <div id="key-hint">
+    <span>1</span> Real Time &nbsp;
+    <span>2</span> Time Lapse &nbsp;
+    <span>3</span> Follow Ship &nbsp;
+    <span>Space</span> Play/Pause
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

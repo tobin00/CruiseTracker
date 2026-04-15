@@ -1,0 +1,268 @@
+/* ── Reset & Base ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #map {
+  width: 100%; height: 100%;
+  background: #05111f;
+  overflow: hidden;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Map ─────────────────────────────────────────────────────── */
+#map { position: absolute; inset: 0; }
+
+/* ── HUD (top-left status bar) ───────────────────────────────── */
+#hud {
+  position: absolute;
+  top: 20px; left: 20px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+#hud-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c8e6ff;
+  text-shadow: 0 0 18px rgba(80,160,255,0.7);
+  pointer-events: none;
+}
+
+#hud-clock {
+  font-size: 0.88rem;
+  color: #7ab8e8;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+
+#hud-mode-bar {
+  display: flex;
+  gap: 6px;
+  pointer-events: all;
+}
+
+.mode-btn {
+  background: rgba(10,30,60,0.75);
+  border: 1px solid rgba(100,170,255,0.25);
+  color: #7ab8e8;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(8px);
+}
+.mode-btn:hover  { border-color: rgba(100,170,255,0.7); color: #c8e6ff; }
+.mode-btn.active {
+  background: rgba(30,90,200,0.55);
+  border-color: rgba(100,180,255,0.8);
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(80,150,255,0.4);
+}
+
+/* ── Time-lapse controls (bottom bar) ───────────────────────── */
+#tl-controls {
+  position: absolute;
+  bottom: 28px; left: 50%; transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(5,17,40,0.82);
+  border: 1px solid rgba(100,170,255,0.2);
+  border-radius: 40px;
+  padding: 10px 22px;
+  backdrop-filter: blur(12px);
+  white-space: nowrap;
+}
+
+#tl-play {
+  background: none;
+  border: 1px solid rgba(100,170,255,0.4);
+  color: #c8e6ff;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+#tl-play:hover { background: rgba(30,90,200,0.4); border-color: rgba(100,180,255,0.8); }
+
+#tl-slider {
+  width: min(400px, 40vw);
+  height: 4px;
+  accent-color: #4a9eff;
+  cursor: pointer;
+}
+
+#tl-date {
+  font-size: 0.88rem;
+  color: #c8e6ff;
+  letter-spacing: 0.06em;
+  min-width: 140px;
+  text-align: center;
+}
+
+#tl-speed-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#tl-speed-wrap button {
+  background: none;
+  border: 1px solid rgba(100,170,255,0.3);
+  color: #7ab8e8;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+#tl-speed-wrap button:hover { color: #fff; border-color: #4a9eff; }
+
+#tl-speed-label {
+  font-size: 0.78rem;
+  color: #7ab8e8;
+  min-width: 60px;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+/* ── Ship info card (follow mode) ───────────────────────────── */
+#ship-card {
+  position: absolute;
+  bottom: 28px; right: 28px;
+  z-index: 100;
+  background: rgba(5,17,40,0.88);
+  border: 1px solid rgba(100,170,255,0.25);
+  border-radius: 16px;
+  padding: 18px 22px;
+  backdrop-filter: blur(14px);
+  min-width: 200px;
+  transition: opacity 0.5s;
+}
+
+#card-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #c8e6ff;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+#card-status {
+  font-size: 0.82rem;
+  color: #7ab8e8;
+  margin-bottom: 4px;
+  letter-spacing: 0.04em;
+}
+
+#card-dest {
+  font-size: 0.82rem;
+  color: #4a9eff;
+  letter-spacing: 0.04em;
+}
+
+/* ── Loading screen ──────────────────────────────────────────── */
+#loading {
+  position: absolute; inset: 0;
+  z-index: 999;
+  background: #05111f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s;
+}
+
+#loading.fade-out { opacity: 0; pointer-events: none; }
+
+#loading-inner { text-align: center; }
+
+#loading-title {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #c8e6ff;
+  text-shadow: 0 0 30px rgba(80,160,255,0.6);
+  margin-bottom: 14px;
+}
+
+#loading-sub {
+  font-size: 0.9rem;
+  color: #7ab8e8;
+  letter-spacing: 0.1em;
+  margin-bottom: 22px;
+}
+
+#loading-bar-wrap {
+  width: 220px;
+  height: 3px;
+  background: rgba(100,170,255,0.15);
+  border-radius: 2px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+#loading-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #1a5cd4, #4a9eff);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+/* ── Key hint ────────────────────────────────────────────────── */
+#key-hint {
+  position: absolute;
+  bottom: 28px; left: 50%; transform: translateX(-50%);
+  z-index: 101;
+  background: rgba(5,17,40,0.7);
+  border: 1px solid rgba(100,170,255,0.15);
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-size: 0.76rem;
+  color: rgba(122,184,232,0.8);
+  letter-spacing: 0.05em;
+  backdrop-filter: blur(8px);
+  transition: opacity 1s;
+  pointer-events: none;
+}
+#key-hint span {
+  display: inline-block;
+  background: rgba(100,170,255,0.15);
+  border: 1px solid rgba(100,170,255,0.3);
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-size: 0.7rem;
+  margin: 0 2px;
+}
+#key-hint.hidden { opacity: 0; }
+
+/* ── MapLibre popup override ─────────────────────────────────── */
+.maplibregl-popup-content {
+  background: rgba(5,17,40,0.92) !important;
+  border: 1px solid rgba(100,170,255,0.3) !important;
+  border-radius: 10px !important;
+  color: #c8e6ff !important;
+  padding: 10px 14px !important;
+  font-family: inherit !important;
+  font-size: 0.82rem !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5) !important;
+}
+.maplibregl-popup-tip { display: none !important; }
+.maplibregl-ctrl-attrib { opacity: 0.4 !important; }
+
+/* ── Utility ─────────────────────────────────────────────────── */
+.hidden { display: none !important; }

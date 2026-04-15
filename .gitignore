@@ -1,0 +1,29 @@
+# ── Local build database (never committed) ───────────────────────
+cruise_tracker.db
+
+# ── Large local-only data files ──────────────────────────────────
+data/coastlines/
+data/itineraries.json
+data/*.csv
+data/.geocache.json
+data/.cache/
+
+# ── Python ───────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# ── Editor junk ──────────────────────────────────────────────────
+*.json~
+*.py~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

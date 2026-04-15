@@ -1,0 +1,70 @@
+Disney Cruise Tracker — Build & Deploy Reference
+================================================
+
+PREREQUISITES
+  pip install -r requirements.txt
+  (Coastline shapefile must be in data/coastlines/ne_110m_land.shp)
+
+
+FULL BUILD (run all steps)
+  python build.py --all \
+    --csv  data/2025-08-26_1907_ALL_SHIPS.csv \
+    --coast data/coastlines/ne_110m_land.shp
+
+
+INDIVIDUAL STEPS
+  Step 1 — Parse new scraper CSV into assignments + cruise stubs:
+    python build.py --step ingest --csv data/NEW_SCRAPE.csv
+
+  Step 2 — Geocode any new ports (internet required for unknown ports):
+    python build.py --step geocode
+
+  Step 3 — Compute water-safe routes + build itinerary positions:
+    python build.py --step route --coast data/coastlines/ne_110m_land.shp
+
+  Step 4 — Export per-ship gzipped JSON to site/data/:
+    python build.py --step export
+
+
+INCREMENTAL UPDATE WORKFLOW
+  1. Run your scraper and save new CSV to data/
+  2. python build.py --all --csv data/NEW_DATE_ALL_SHIPS.csv \
+                     --coast data/coastlines/ne_110m_land.shp
+     (only new sailings are processed; all cached routes reused)
+  3. git add site/data/ data/assignments.json data/routes_cache.json
+  4. git commit -m "Data refresh YYYY-MM-DD"
+  5. git push
+     → GitHub Actions deploys to ships.coziahr.com automatically
+
+
+LOCAL PREVIEW
+  python -m http.server 8000 --directory site
+  Open: http://localhost:8000
+
+
+TUNE ROUTING QUALITY (slower but more accurate routes)
+  python build.py --step route \
+    --coast data/coastlines/ne_110m_land.shp \
+    --hex-km 10 --buffer-km 6 --pad-deg 14 --verbose
+  (Routes are cached; only uncomputed legs pay the cost)
+
+
+REBUILD ALL ROUTES FROM SCRATCH
+  python build.py --step route \
+    --coast data/coastlines/ne_110m_land.shp \
+    --rebuild-all --verbose
+
+
+GITHUB + DNS SETUP (one time)
+  1. Create GitHub repo, push this project
+  2. Settings → Pages → Source: GitHub Actions
+  3. In Dreamhost DNS: add CNAME  ships.coziahr.com → <user>.github.io
+  4. In GitHub repo Settings → Pages → Custom domain: ships.coziahr.com
+
+
+DATA NOTES
+  - cruise_tracker.db is local only (gitignored). It is auto-created on first run.
+  - data/routes_cache.json is committed to git (expensive to recompute).
+  - 23 cruise types still have empty legs — ships on those routes won't appear.
+    To fix, edit data/cruises/<slug>.json and fill in the "legs" array.
+    See any filled cruise JSON for the format.
