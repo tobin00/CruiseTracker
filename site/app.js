@@ -183,6 +183,12 @@ function setLoadingBar(pct) {
 }
 
 // ── Map initialisation ──────────────────────────────────────────
+function tintOcean() {
+  // Shift Carto Dark Matter water from grey-blue (#2C353C) to deep Caribbean teal
+  map.setPaintProperty('water',        'fill-color', '#0a2535');
+  map.setPaintProperty('water_shadow', 'fill-color', '#061820');
+}
+
 function initMap() {
   map = new maplibregl.Map({
     container: 'map',
@@ -195,7 +201,7 @@ function initMap() {
   });
 
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
-  return new Promise(resolve => map.on('load', resolve));
+  return new Promise(resolve => map.on('load', () => { tintOcean(); resolve(); }));
 }
 
 // ── Ship layers ─────────────────────────────────────────────────
@@ -384,6 +390,22 @@ function addShipLayers() {
     layout: { 'line-join': 'round', 'line-cap': 'round' },
   });
 
+  // Animated wake (marching dashes on top of trail)
+  // Each frame shifts the dash pattern by 0.5 units to create forward motion
+  map.addLayer({
+    id: 'trails-wake',
+    type: 'line',
+    source: 'trails',
+    paint: {
+      'line-color':      ['get', 'color'],
+      'line-width':      1.5,
+      'line-opacity':    0.65,
+      'line-dasharray':  [0, 4, 2],
+    },
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+  });
+  startWakeAnimation();
+
   // Ship source
   map.addSource('ships', { type: 'geojson', data: { type:'FeatureCollection', features:[] } });
 
@@ -446,6 +468,35 @@ function updateMapData(targetMs) {
   const trails = buildTrailGeoJSON(targetMs);
   map.getSource('ships')?.setData(ships);
   map.getSource('trails')?.setData(trails);
+}
+
+// ── Wake trail animation ────────────────────────────────────────
+// Cycles through shifted dash patterns to create marching-ants wake effect.
+// Throttled to ~15fps — cheap enough for Fire TV.
+const WAKE_FRAMES = [
+  [0, 4, 2], [0.5, 4, 1.5], [1, 4, 1], [1.5, 4, 0.5], [2, 4, 0],
+  [0, 0.5, 2, 3.5], [0, 1, 2, 3], [0, 1.5, 2, 2.5], [0, 2, 2, 2],
+  [0, 2.5, 2, 1.5], [0, 3, 2, 1], [0, 3.5, 2, 0.5],
+];
+let wakeRafId   = null;
+let wakeFrame   = 0;
+let wakeLastMs  = 0;
+const WAKE_INTERVAL_MS = 66; // ~15 fps
+
+function wakeAnimTick(ts) {
+  if (ts - wakeLastMs >= WAKE_INTERVAL_MS) {
+    wakeFrame = (wakeFrame + 1) % WAKE_FRAMES.length;
+    if (map.getLayer('trails-wake')) {
+      map.setPaintProperty('trails-wake', 'line-dasharray', WAKE_FRAMES[wakeFrame]);
+    }
+    wakeLastMs = ts;
+  }
+  wakeRafId = requestAnimationFrame(wakeAnimTick);
+}
+
+function startWakeAnimation() {
+  if (wakeRafId) return;
+  wakeRafId = requestAnimationFrame(wakeAnimTick);
 }
 
 // ── Real-time mode ──────────────────────────────────────────────

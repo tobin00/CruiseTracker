@@ -27,14 +27,14 @@ html, body, #map {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #c8e6ff;
-  text-shadow: 0 0 18px rgba(80,160,255,0.7);
+  color: #ffd166;
+  text-shadow: 0 0 22px rgba(255,180,60,0.7), 0 0 6px rgba(255,140,0,0.4);
   pointer-events: none;
 }
 
 #hud-clock {
   font-size: 0.88rem;
-  color: #7ab8e8;
+  color: #06d6a0;
   letter-spacing: 0.06em;
   pointer-events: none;
 }
@@ -46,9 +46,9 @@ html, body, #map {
 }
 
 .mode-btn {
-  background: rgba(10,30,60,0.75);
-  border: 1px solid rgba(100,170,255,0.25);
-  color: #7ab8e8;
+  background: rgba(5,30,25,0.75);
+  border: 1px solid rgba(6,214,160,0.3);
+  color: #06d6a0;
   padding: 6px 14px;
   border-radius: 20px;
   font-size: 0.78rem;
@@ -58,12 +58,12 @@ html, body, #map {
   transition: all 0.2s;
   backdrop-filter: blur(8px);
 }
-.mode-btn:hover  { border-color: rgba(100,170,255,0.7); color: #c8e6ff; }
+.mode-btn:hover  { border-color: rgba(6,214,160,0.8); color: #ffd166; }
 .mode-btn.active {
-  background: rgba(30,90,200,0.55);
-  border-color: rgba(100,180,255,0.8);
-  color: #ffffff;
-  box-shadow: 0 0 12px rgba(80,150,255,0.4);
+  background: rgba(6,140,90,0.45);
+  border-color: rgba(6,214,160,0.9);
+  color: #ffd166;
+  box-shadow: 0 0 14px rgba(6,214,160,0.35);
 }
 
 /* ── Time-lapse controls (bottom bar) ───────────────────────── */
@@ -74,8 +74,8 @@ html, body, #map {
   display: flex;
   align-items: center;
   gap: 14px;
-  background: rgba(5,17,40,0.82);
-  border: 1px solid rgba(100,170,255,0.2);
+  background: rgba(3,20,18,0.85);
+  border: 1px solid rgba(6,214,160,0.2);
   border-radius: 40px;
   padding: 10px 22px;
   backdrop-filter: blur(12px);
@@ -84,8 +84,8 @@ html, body, #map {
 
 #tl-play {
   background: none;
-  border: 1px solid rgba(100,170,255,0.4);
-  color: #c8e6ff;
+  border: 1px solid rgba(6,214,160,0.4);
+  color: #06d6a0;
   width: 36px; height: 36px;
   border-radius: 50%;
   font-size: 1rem;
@@ -94,18 +94,18 @@ html, body, #map {
   transition: all 0.2s;
   flex-shrink: 0;
 }
-#tl-play:hover { background: rgba(30,90,200,0.4); border-color: rgba(100,180,255,0.8); }
+#tl-play:hover { background: rgba(6,140,90,0.35); border-color: rgba(6,214,160,0.9); color: #ffd166; }
 
 #tl-slider {
   width: min(400px, 40vw);
   height: 4px;
-  accent-color: #4a9eff;
+  accent-color: #06d6a0;
   cursor: pointer;
 }
 
 #tl-date {
   font-size: 0.88rem;
-  color: #c8e6ff;
+  color: #ffd166;
   letter-spacing: 0.06em;
   min-width: 140px;
   text-align: center;
@@ -119,8 +119,8 @@ html, body, #map {
 
 #tl-speed-wrap button {
   background: none;
-  border: 1px solid rgba(100,170,255,0.3);
-  color: #7ab8e8;
+  border: 1px solid rgba(6,214,160,0.3);
+  color: #06d6a0;
   width: 28px; height: 28px;
   border-radius: 50%;
   font-size: 1.1rem;
@@ -128,11 +128,11 @@ html, body, #map {
   display: flex; align-items: center; justify-content: center;
   transition: all 0.15s;
 }
-#tl-speed-wrap button:hover { color: #fff; border-color: #4a9eff; }
+#tl-speed-wrap button:hover { color: #ffd166; border-color: #06d6a0; }
 
 #tl-speed-label {
   font-size: 0.78rem;
-  color: #7ab8e8;
+  color: #06d6a0;
   min-width: 60px;
   text-align: center;
   letter-spacing: 0.04em;
@@ -143,8 +143,8 @@ html, body, #map {
   position: absolute;
   bottom: 28px; right: 28px;
   z-index: 100;
-  background: rgba(5,17,40,0.88);
-  border: 1px solid rgba(100,170,255,0.25);
+  background: rgba(3,20,18,0.88);
+  border: 1px solid rgba(6,214,160,0.25);
   border-radius: 16px;
   padding: 18px 22px;
   backdrop-filter: blur(14px);
@@ -155,21 +155,21 @@ html, body, #map {
 #card-name {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #c8e6ff;
+  color: #ffd166;
   letter-spacing: 0.06em;
   margin-bottom: 6px;
 }
 
 #card-status {
   font-size: 0.82rem;
-  color: #7ab8e8;
+  color: #06d6a0;
   margin-bottom: 4px;
   letter-spacing: 0.04em;
 }
 
 #card-dest {
   font-size: 0.82rem;
-  color: #4a9eff;
+  color: #06d6a0;
   letter-spacing: 0.04em;
 }
 
@@ -217,7 +217,7 @@ html, body, #map {
 #loading-bar {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #1a5cd4, #4a9eff);
+  background: linear-gradient(90deg, #06856a, #06d6a0, #ffd166);
   border-radius: 2px;
   transition: width 0.3s;
 }
@@ -269,9 +269,9 @@ html, body, #map {
   position: absolute;
   top: 20px; right: 20px;
   z-index: 101;
-  background: rgba(10,30,60,0.75);
-  border: 1px solid rgba(100,170,255,0.25);
-  color: #7ab8e8;
+  background: rgba(3,20,18,0.75);
+  border: 1px solid rgba(6,214,160,0.25);
+  color: #06d6a0;
   width: 38px; height: 38px;
   border-radius: 50%;
   font-size: 1.1rem;
@@ -280,7 +280,7 @@ html, body, #map {
   backdrop-filter: blur(8px);
   transition: opacity 0.6s, border-color 0.2s, color 0.2s;
 }
-#btn-fullscreen:hover { border-color: rgba(100,170,255,0.7); color: #c8e6ff; }
+#btn-fullscreen:hover { border-color: rgba(6,214,160,0.8); color: #ffd166; }
 
 /* ── Auto-hide: UI elements fade when idle ───────────────────── */
 #hud, #tl-controls, #ship-card, #btn-fullscreen {
