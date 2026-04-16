@@ -499,6 +499,11 @@ function startWakeAnimation() {
   wakeRafId = requestAnimationFrame(wakeAnimTick);
 }
 
+function stopWakeAnimation() {
+  if (wakeRafId) { cancelAnimationFrame(wakeRafId); wakeRafId = null; }
+  if (map.getLayer('trails-wake')) map.setPaintProperty('trails-wake', 'line-opacity', 0);
+}
+
 // ── Real-time mode ──────────────────────────────────────────────
 let rtRafId = null;
 let rtLastMapUpdate = 0;
@@ -678,7 +683,7 @@ function mapAttrib() {
 
 function showUI() {
   if (uiHidden) {
-    ['hud-title', 'hud-mode-bar', 'btn-fullscreen', 'tl-controls', 'ship-card'].forEach(id => {
+    ['hud-title', 'hud-mode-bar', 'btn-fullscreen', 'btn-settings', 'tl-controls', 'ship-card'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.classList.remove('ui-hidden');
     });
@@ -691,8 +696,10 @@ function showUI() {
 }
 
 function hideUI() {
-  // Hide title, mode buttons, fullscreen button — but NOT the clock
-  ['hud-title', 'hud-mode-bar', 'btn-fullscreen'].forEach(id => {
+  // Don't hide if settings panel is open
+  if ($('settings-panel') && !$('settings-panel').classList.contains('hidden')) return;
+  // Hide title, mode buttons, fullscreen + settings buttons — but NOT the clock
+  ['hud-title', 'hud-mode-bar', 'btn-fullscreen', 'btn-settings'].forEach(id => {
     document.getElementById(id).classList.add('ui-hidden');
   });
   const attrib = mapAttrib();
@@ -807,6 +814,52 @@ function wireControls() {
 
   // Fade out key hint after 6s
   setTimeout(() => $('key-hint').classList.add('hidden'), 6000);
+
+  // ── Settings panel ───────────────────────────────────────────
+  function loadSettings() {
+    const s = JSON.parse(localStorage.getItem('dcft-settings') || '{}');
+    if (s.eggsEnabled  === false) { $('set-eggs-enabled').checked = false; setEasterEnabled(false); }
+    if (s.wakeEnabled  === false) { $('set-wake-enabled').checked = false; stopWakeAnimation(); }
+    if (s.eggFreq) {
+      eggFrequency = s.eggFreq;
+      document.querySelectorAll('.freq-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.freq === s.eggFreq));
+    }
+  }
+
+  function saveSettings() {
+    localStorage.setItem('dcft-settings', JSON.stringify({
+      eggsEnabled: $('set-eggs-enabled').checked,
+      wakeEnabled: $('set-wake-enabled').checked,
+      eggFreq:     eggFrequency,
+    }));
+  }
+
+  $('btn-settings').addEventListener('click', () => {
+    const panel = $('settings-panel');
+    const open  = panel.classList.toggle('hidden') === false;
+    $('btn-settings').classList.toggle('active', open);
+    if (open) clearTimeout(uiHideTimer); // keep UI visible while settings open
+  });
+
+  $('set-eggs-enabled').addEventListener('change', e => {
+    setEasterEnabled(e.target.checked); saveSettings();
+  });
+
+  $('set-wake-enabled').addEventListener('change', e => {
+    e.target.checked ? startWakeAnimation() : stopWakeAnimation(); saveSettings();
+  });
+
+  document.querySelectorAll('.freq-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.freq-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      setEasterFrequency(btn.dataset.freq);
+      saveSettings();
+    });
+  });
+
+  loadSettings();
 }
 
 // ── Boot ─────────────────────────────────────────────────────────
@@ -824,6 +877,9 @@ function wireControls() {
 
     // Start in real-time mode
     switchMode('realtime');
+
+    // Start easter eggs
+    if (typeof startEasterEggs === 'function') startEasterEggs();
 
     // Hide loading screen
     const loadEl = $('loading');
